@@ -3,7 +3,8 @@
 Rutas relativas a: `/Users/luisgarza27/Documents/HANOVA/odoo_19_visar/odoo/addons/`
 Versión: 19.0 Enterprise (`odoo/release.py` → `version_info = (19, 0, 0, FINAL, 0)`).
 
-Módulos custom Visar: `visar_base`, `visar_fsm`, `visar_appointment` en `/Users/luisgarza27/Documents/HANOVA/VISAR/repo/`.
+Módulos custom Visar: `visar_base`, `visar_fsm`, `visar_appointment` en `/Users/luisgarza27/Documents/HANOVA/VISAR/repo/`
+(repositorio Git: `https://github.com/luisgarza-g/visar-luisg.git`, rama `main`).
 
 > Los números de línea pueden desplazarse en upgrades; usa los nombres de método/campo
 > como referencia primaria y reverifica antes de confiar en una línea exacta.

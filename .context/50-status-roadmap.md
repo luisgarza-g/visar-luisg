@@ -1,7 +1,8 @@
 # Estado y roadmap
 
-> Última actualización: **jun-2026** — split en 3 módulos + D-06 + D-07 parcial + calificación wizard
-> (**visar_appointment v19.0.2.0.15**, **visar_base / visar_fsm v19.0.1.0.0**).
+> Última actualización: **26-jun-2026** — split en 3 módulos + D-06 + D-07 parcial + calificación wizard
+> + UI tarea FSM con orden de venta completa
+> (**visar_appointment v19.0.2.0.15**, **visar_base v19.0.1.0.0**, **visar_fsm v19.0.1.0.1**).
 > Productos/variantes **no se crean en XML** — se configuran/enlazan en backend + migraciones legacy.
 
 ## Hecho — D-03 (inversión de flujo + filtrado de técnicos)
@@ -68,16 +69,17 @@
 - [x] Respuestas inyectadas en Questions & Answers vía `_visar_enrich_answer_inputs` (zona, m²/rangos, calificación).
 - [x] Preguntas **desvinculadas** del formulario nativo de cita (migración 19.0.2.0.12).
 
-## Parcial — D-07 (FSM) — `visar_fsm`
+## Parcial — D-07 (FSM) — `visar_fsm` (v19.0.1.0.1)
 
 - [x] `post_init_hook` — proyectos FSM + `service_tracking` + `project_id` en productos.
 - [x] Override `_timesheet_service_generation` — **una tarea por proyecto**.
 - [x] Add-ons asignados a tarea del servicio que los declara (`task_id` en línea SO).
 - [x] Enriquecimiento: técnico (`appointment.resource` → `user_ids`) y fechas desde `calendar.event`.
 - [x] `calendar.event.visar_fsm_task_ids` (computed).
+- [x] **UI tarea FSM:** ocultar `sale_line_id` nativo; mostrar `visar_sale_order_id` (orden completa de la cita).
 - [ ] Worksheet / checklist / fotos / firma (plantillas `worksheet.template`).
 - [ ] Reporte dual interno vs cliente.
-- [ ] Cross-link explícito cita ↔ tarea (hoy vía SO compartida).
+- [ ] Cross-link explícito cita ↔ tarea en agenda (hoy vía SO compartida + `visar_sale_order_id` en tarea).
 - [ ] E2E: confirmar pago → verificar N tareas FSM correctas en UI técnico.
 
 ## Hecho — Fixes E2E web Odoo 19 (jun-2026)
@@ -117,6 +119,7 @@
 
 - **Odoo:** `/Users/luisgarza27/Documents/HANOVA/odoo_19_visar`
 - **Repo módulos:** `/Users/luisgarza27/Documents/HANOVA/VISAR/repo`
+- **Git remoto:** `https://github.com/luisgarza-g/visar-luisg.git` (rama `main`)
 - **Config:** `odoo.visar.conf`
 - **BD:** `visar_local`, puerto **8071**, credenciales `admin / admin`
 - **Arranque:**

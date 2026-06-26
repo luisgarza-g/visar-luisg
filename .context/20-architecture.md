@@ -6,7 +6,8 @@ Odoo 19 Enterprise. El proyecto se divide en **tres módulos** con dependencia e
 visar_base  →  visar_fsm  →  visar_appointment
 ```
 
-> **Estado v19.0.2.0.15:** D-05/D-06 codificados + D-07 parcial + paso calificación + respuestas nativas híbridas.
+> **Estado 26-jun-2026:** D-05/D-06 codificados + D-07 parcial (incl. UI tarea FSM) + paso calificación +
+> respuestas nativas híbridas. Repo Git: `github.com/luisgarza-g/visar-luisg`.
 
 ---
 
@@ -47,7 +48,7 @@ Pestaña Visar en producto + tabla add-ons junto a `optional_product_ids`.
 
 ---
 
-## `visar_fsm` (v19.0.1.0.0)
+## `visar_fsm` (v19.0.1.0.1)
 
 **Dependencias:** `visar_base`, `appointment`, `hr`, `industry_fsm`, `industry_fsm_sale`.
 
@@ -59,8 +60,15 @@ Generación de tareas FSM al confirmar pedidos Visar (D-07).
 |---|---|---|
 | `sale.order.line` | `models/sale_order_fsm.py` | Override `_timesheet_service_generation`: agrupa líneas Visar por `project_id` → **una tarea por proyecto**; asigna add-ons como materiales; enriquece tareas. |
 | `sale.order` | `models/sale_order_fsm.py` | `_visar_enrich_fsm_tasks` — copia `planned_date_begin`/`date_deadline` y `user_ids` desde `calendar.event`. |
+| `project.task` | `models/project_task.py` | **`visar_sale_order_id`** (related stored a `sale_order_id`) — expone la orden completa en la tarea. |
 | `calendar.event` | `models/calendar_event.py` | `visar_fsm_task_ids` (computed M2m). |
 | `appointment.resource` | `models/appointment_resource.py` | (vista backend) |
+
+### Vistas
+
+| Archivo | Qué hace |
+|---|---|
+| `views/project_task_views.xml` | Oculta `sale_line_id` nativo; muestra `visar_sale_order_id` (solo lectura). |
 
 ### Setup — `hooks.py`
 
@@ -86,7 +94,7 @@ Wizard web, controlador de citas, tipos de entrada y plantillas frontend.
 | `appointment.type` | `models/appointment_type.py` | `visar_product_tmpl_ids`, `visar_is_master`, **`visar_flow`**. Helpers: `_visar_get_master_appointment_type`, `_visar_get_valuation_appointment_type`, `_visar_resolve_wizard_items`, **`_visar_build_sale_lines`** (incluye add-ons + roedores), `_visar_service_resource_pools`, `_visar_filter_slots_multi_service`, `_visar_quote_booking`, **`_visar_build_native_answer_inputs`**. |
 | `appointment.resource` | `models/appointment_resource.py` | `visar_zone_ids`, `visar_service_ids`. |
 | `calendar.event` | `models/calendar_event.py` | `visar_zone_id`, `visar_m2` (legacy), **`visar_booking_items`**. |
-| `product.template` | `models/product_template.py` | `visar_appointment_type_id` (enlace 1:1 tipo cita). |
+| `product.template` | `models/product_template.py` | `visar_appointment_type_id` (enlace 1:1 tipo cita). Vista: reordena `optional_product_ids` + tabla add-ons en pestaña Ventas. |
 | `sale.order` | `models/sale_order.py` | `_visar_apply_zone_pricelist`. |
 
 ### Datos — `data/visar_questions_data.xml`
@@ -97,6 +105,8 @@ Preguntas reutilizables para Questions & Answers: Zona, m², plaga, roedores, ti
 ### Migraciones — catálogo legacy
 
 `migrations/19.0.2.0.7/post-migrate.py` → `_visar_migrate_legacy_catalog`: crea grupos/dimensiones desde campos legacy del producto, enlaza tramos, regla combo. **Solo corre en `-u`.**
+
+`migrations/19.0.2.0.15/post-migrate.py` → marcador de versión tras split en 3 módulos (sin lógica adicional).
 
 ### Controlador — `controllers/appointment.py`
 

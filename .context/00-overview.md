@@ -43,13 +43,13 @@ El tabulador completo está en [`70-tabulador.md`](./70-tabulador.md).
 
 Detalle en [`10-requirements.md`](./10-requirements.md).
 
-## Estado actual (resumen — jun-2026)
+## Estado actual (resumen — 26-jun-2026)
 
 - **D-03 (legacy):** implementado.
 - **D-05:** implementado — wizard configurable, multi-técnico, SO multi-línea, entrada `/appointment`.
 - **D-04:** implementado junto con D-05 — pricelist por zona, combo, valoración dedupe.
 - **D-06:** implementado en `visar_base` — tabla add-ons, inyección obligatoria en checkout.
-- **D-07:** parcial en `visar_fsm` — tareas agrupadas por proyecto, add-ons como materiales, técnico/fecha desde cita; pendiente worksheet, reportes dual, WhatsApp.
+- **D-07:** parcial en `visar_fsm` (**v19.0.1.0.1**) — tareas agrupadas por proyecto, add-ons como materiales, técnico/fecha desde cita, **orden de venta completa en tarea FSM** (`visar_sale_order_id`); pendiente worksheet, reportes dual, WhatsApp.
 - **Calificación wizard:** implementado — paso plaga/roedores/tipo plaga + producto roedores + estaciones obligatorias.
 - **Respuestas nativas:** híbrido implementado — zona, m² (rangos) y calificación en Questions & Answers.
 - **E2E web:** en curso; validar wizard completo con calificación, add-ons y generación FSM.
@@ -59,10 +59,10 @@ Ver [`50-status-roadmap.md`](./50-status-roadmap.md).
 ## Mapa de carpetas
 
 ```
-VISAR/repo/
+VISAR/repo/                ← Git: github.com/luisgarza-g/visar-luisg (rama main)
 ├── .context/              ← esta carpeta (documentación para desarrollar)
 ├── visar_base/            ← catálogos compartidos (v19.0.1.0.0)
-├── visar_fsm/             ← FSM: tareas agrupadas por proyecto (v19.0.1.0.0)
+├── visar_fsm/             ← FSM: tareas agrupadas por proyecto (v19.0.1.0.1)
 └── visar_appointment/     ← wizard web + citas (v19.0.2.0.15)
     └── migrations/        ← post-migrate catálogo legacy (¡solo en upgrade!)
 ```

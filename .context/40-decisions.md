@@ -160,6 +160,17 @@ Monolito `visar_appointment` dividido para separar responsabilidades:
 - Proyectos seedeados en `visar_fsm/hooks.py` (configurable vía `product.template.project_id`).
 - Pendiente: worksheets, reportes, E2E app técnico.
 
+## [IMPLEMENTADO — 26-jun-2026] Ocultar `sale_line_id` y mostrar orden de venta completa en tarea FSM
+
+- **Decisión:** todos los servicios Visar son precio fijo/prepago; al administrativo le interesa la **orden
+  completa** (cita multi-línea), no la línea representante que usa el core para timesheet.
+- **Qué:** `sale_line_id` sigue asignándose en `_visar_create_grouped_tasks` pero se **oculta** en la vista;
+  se muestra `visar_sale_order_id` (related a `sale_order_id`).
+- **Por qué:** una cita con fumigación + corte genera varias líneas SO pero una o pocas tareas FSM; ver
+  "Artículo de la orden de venta" confunde. El puente nativo FSM↔Venta no se rompe.
+- **Descartado:** pestaña One2many `visar_sale_line_ids`.
+- **Módulo:** `visar_fsm` v19.0.1.0.1 — `models/project_task.py`, `views/project_task_views.xml`.
+
 ## [IMPLEMENTADO — jun-2026] Datos demo: productos existentes, no XML
 
 En `visar_local` los productos/variantes **ya existían** (con atributos **A/B/C × rango** en cada

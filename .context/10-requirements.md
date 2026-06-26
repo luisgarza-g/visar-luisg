@@ -305,12 +305,13 @@ El campo es related stored → al actualizar se recomputa solo; no requiere migr
 - El botón nativo "Sales Order", el retorno de materiales a la SO y la cita ↔ tarea siguen funcionando.
 - **No** existe pestaña/campo `visar_sale_line_ids` (propuesta descartada).
 
-**Implementado (jun-2026):**
+**Implementado (26-jun-2026):**
 - Proyectos FSM configurables vía `visar_fsm/hooks.py` (`post_init_hook` + migración 19.0.2.0.14).
 - Agrupado **una tarea por proyecto** en `_timesheet_service_generation`.
 - Add-ons colgados como materiales de la tarea del servicio que los declara.
 - Técnico → `user_ids` y fechas → `planned_date_begin`/`date_deadline` desde `calendar.event`.
 - `calendar.event.visar_fsm_task_ids` (computed).
+- UI tarea FSM: `visar_sale_order_id` visible; `sale_line_id` oculto (`visar_fsm` v19.0.1.0.1).
 
 **Pendiente:**
 - **Worksheet (`worksheet.template`):** checklist/fotos/firma; **versión interna vs cliente** (§6 reunión).

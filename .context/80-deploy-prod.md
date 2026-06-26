@@ -17,7 +17,7 @@ Odoo corre cosas distintas según la acción:
 
 | Módulo | Setup en `-i` | Setup solo en `-u` |
 |---|---|---|
-| **`visar_fsm`** | ✅ `post_init_hook` → proyectos FSM + `project_id` en productos | Re-ejecutado en migración 19.0.2.0.14 |
+| **`visar_fsm`** | ✅ `post_init_hook` → proyectos FSM + `project_id` en productos | Re-ejecutado en migración 19.0.2.0.14; **v19.0.1.0.1** añade UI tarea (`visar_sale_order_id`) |
 | **`visar_base`** | Solo `data/` (placeholder vacío) | — |
 | **`visar_appointment`** | Solo `data/visar_questions_data.xml` | ❌ `_visar_migrate_legacy_catalog` (grupos, dimensiones, combo) en 19.0.2.0.7 |
 

@@ -1,0 +1,198 @@
+{
+  "servicios": [
+    {
+      "id": 9,
+      "nombre": "Fumigación interior",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño inmueble": ["1-250", "251 - 500", "501 - 1000"]
+      },
+      "variantes": [
+        { "id": 428, "Zona": "A", "Tamaño inmueble": "1-250" },
+        { "id": 615, "Zona": "A", "Tamaño inmueble": "251 - 500" },
+        { "id": 430, "Zona": "A", "Tamaño inmueble": "501 - 1000" },
+        { "id": 432, "Zona": "B", "Tamaño inmueble": "1-250" },
+        { "id": 616, "Zona": "B", "Tamaño inmueble": "251 - 500" },
+        { "id": 434, "Zona": "B", "Tamaño inmueble": "501 - 1000" },
+        { "id": 436, "Zona": "C", "Tamaño inmueble": "1-250" },
+        { "id": 617, "Zona": "C", "Tamaño inmueble": "251 - 500" },
+        { "id": 438, "Zona": "C", "Tamaño inmueble": "501 - 1000" }
+      ]
+    },
+    {
+      "id": 11,
+      "nombre": "Corte de pasto",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño inmueble": ["0 - 50", "51 - 100", "101 - 150", "151 - 200"]
+      },
+      "variantes": [
+        { "id": 621, "Zona": "A", "Tamaño inmueble": "0 - 50" },
+        { "id": 622, "Zona": "A", "Tamaño inmueble": "51 - 100" },
+        { "id": 623, "Zona": "A", "Tamaño inmueble": "101 - 150" },
+        { "id": 633, "Zona": "A", "Tamaño inmueble": "151 - 200" },
+        { "id": 625, "Zona": "B", "Tamaño inmueble": "0 - 50" },
+        { "id": 626, "Zona": "B", "Tamaño inmueble": "51 - 100" },
+        { "id": 627, "Zona": "B", "Tamaño inmueble": "101 - 150" },
+        { "id": 634, "Zona": "B", "Tamaño inmueble": "151 - 200" },
+        { "id": 629, "Zona": "C", "Tamaño inmueble": "0 - 50" },
+        { "id": 630, "Zona": "C", "Tamaño inmueble": "51 - 100" },
+        { "id": 631, "Zona": "C", "Tamaño inmueble": "101 - 150" },
+        { "id": 635, "Zona": "C", "Tamaño inmueble": "151 - 200" }
+      ]
+    },
+    {
+      "id": 29,
+      "nombre": "Fumigación exterior",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño jardín": ["0 - 50", "51 - 100", "101 - 500"]
+      },
+      "variantes": [
+        { "id": 476, "Zona": "A", "Tamaño jardín": "0 - 50" },
+        { "id": 477, "Zona": "A", "Tamaño jardín": "51 - 100" },
+        { "id": 478, "Zona": "A", "Tamaño jardín": "101 - 500" },
+        { "id": 480, "Zona": "B", "Tamaño jardín": "0 - 50" },
+        { "id": 481, "Zona": "B", "Tamaño jardín": "51 - 100" },
+        { "id": 482, "Zona": "B", "Tamaño jardín": "101 - 500" },
+        { "id": 484, "Zona": "C", "Tamaño jardín": "0 - 50" },
+        { "id": 485, "Zona": "C", "Tamaño jardín": "51 - 100" },
+        { "id": 486, "Zona": "C", "Tamaño jardín": "101 - 500" }
+      ]
+    },
+    {
+      "id": 30,
+      "nombre": "Fumigación interior + exterior",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño inmueble": ["1-250", "251 - 500", "501 - 1000"],
+        "Tamaño jardín": ["0 - 50", "51 - 100", "101 - 500"]
+      },
+      "variantes": [
+        { "id": 488, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 489, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 490, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 500" },
+        { "id": 492, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 493, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 494, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 500" },
+        { "id": 496, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 497, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 498, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 500" },
+        { "id": 504, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 505, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 506, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 500" },
+        { "id": 508, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 509, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 510, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 500" },
+        { "id": 512, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 513, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 514, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 500" },
+        { "id": 520, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 521, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 522, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 500" },
+        { "id": 524, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 525, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 526, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 500" },
+        { "id": 528, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 529, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 530, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 500" }
+      ]
+    },
+    {
+      "id": 31,
+      "nombre": "Corte de pasto y poda",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño jardín": ["0 - 50", "51 - 100", "101 - 150", "151 - 200", "200+"]
+      },
+      "variantes": [
+        { "id": 539, "Zona": "A", "Tamaño jardín": "0 - 50" },
+        { "id": 540, "Zona": "A", "Tamaño jardín": "51 - 100" },
+        { "id": 541, "Zona": "A", "Tamaño jardín": "101 - 150" },
+        { "id": 542, "Zona": "A", "Tamaño jardín": "151 - 200" },
+        { "id": 543, "Zona": "A", "Tamaño jardín": "200+" },
+        { "id": 544, "Zona": "B", "Tamaño jardín": "0 - 50" },
+        { "id": 545, "Zona": "B", "Tamaño jardín": "51 - 100" },
+        { "id": 546, "Zona": "B", "Tamaño jardín": "101 - 150" },
+        { "id": 547, "Zona": "B", "Tamaño jardín": "151 - 200" },
+        { "id": 548, "Zona": "B", "Tamaño jardín": "200+" },
+        { "id": 549, "Zona": "C", "Tamaño jardín": "0 - 50" },
+        { "id": 550, "Zona": "C", "Tamaño jardín": "51 - 100" },
+        { "id": 551, "Zona": "C", "Tamaño jardín": "101 - 150" },
+        { "id": 552, "Zona": "C", "Tamaño jardín": "151 - 200" },
+        { "id": 553, "Zona": "C", "Tamaño jardín": "200+" }
+      ]
+    },
+    {
+      "id": 32,
+      "nombre": "COMBO - Fumigación completa + Corte de pasto",
+      "atributos": {
+        "Zona": ["A", "B", "C"],
+        "Tamaño inmueble": ["1-250", "251 - 500", "501 - 1000", "1000+"],
+        "Tamaño jardín": ["0 - 50", "51 - 100", "101 - 150", "151 - 200", "200+"]
+      },
+      "variantes": [
+        { "id": 554, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 555, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 556, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 150" },
+        { "id": 557, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "151 - 200" },
+        { "id": 558, "Zona": "A", "Tamaño inmueble": "1-250",      "Tamaño jardín": "200+" },
+        { "id": 559, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 560, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 561, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 150" },
+        { "id": 562, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "151 - 200" },
+        { "id": 563, "Zona": "A", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "200+" },
+        { "id": 564, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 565, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 566, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 150" },
+        { "id": 567, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "151 - 200" },
+        { "id": 568, "Zona": "A", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "200+" },
+        { "id": 569, "Zona": "A", "Tamaño inmueble": "1000+",      "Tamaño jardín": "0 - 50" },
+        { "id": 570, "Zona": "A", "Tamaño inmueble": "1000+",      "Tamaño jardín": "51 - 100" },
+        { "id": 571, "Zona": "A", "Tamaño inmueble": "1000+",      "Tamaño jardín": "101 - 150" },
+        { "id": 572, "Zona": "A", "Tamaño inmueble": "1000+",      "Tamaño jardín": "151 - 200" },
+        { "id": 573, "Zona": "A", "Tamaño inmueble": "1000+",      "Tamaño jardín": "200+" },
+        { "id": 574, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 575, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 576, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 150" },
+        { "id": 577, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "151 - 200" },
+        { "id": 578, "Zona": "B", "Tamaño inmueble": "1-250",      "Tamaño jardín": "200+" },
+        { "id": 579, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 580, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 581, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 150" },
+        { "id": 582, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "151 - 200" },
+        { "id": 583, "Zona": "B", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "200+" },
+        { "id": 584, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 585, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 586, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 150" },
+        { "id": 587, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "151 - 200" },
+        { "id": 588, "Zona": "B", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "200+" },
+        { "id": 589, "Zona": "B", "Tamaño inmueble": "1000+",      "Tamaño jardín": "0 - 50" },
+        { "id": 590, "Zona": "B", "Tamaño inmueble": "1000+",      "Tamaño jardín": "51 - 100" },
+        { "id": 591, "Zona": "B", "Tamaño inmueble": "1000+",      "Tamaño jardín": "101 - 150" },
+        { "id": 592, "Zona": "B", "Tamaño inmueble": "1000+",      "Tamaño jardín": "151 - 200" },
+        { "id": 593, "Zona": "B", "Tamaño inmueble": "1000+",      "Tamaño jardín": "200+" },
+        { "id": 594, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "0 - 50" },
+        { "id": 595, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "51 - 100" },
+        { "id": 596, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "101 - 150" },
+        { "id": 597, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "151 - 200" },
+        { "id": 598, "Zona": "C", "Tamaño inmueble": "1-250",      "Tamaño jardín": "200+" },
+        { "id": 599, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "0 - 50" },
+        { "id": 600, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "51 - 100" },
+        { "id": 601, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "101 - 150" },
+        { "id": 602, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "151 - 200" },
+        { "id": 603, "Zona": "C", "Tamaño inmueble": "251 - 500",  "Tamaño jardín": "200+" },
+        { "id": 604, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "0 - 50" },
+        { "id": 605, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "51 - 100" },
+        { "id": 606, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "101 - 150" },
+        { "id": 607, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "151 - 200" },
+        { "id": 608, "Zona": "C", "Tamaño inmueble": "501 - 1000", "Tamaño jardín": "200+" },
+        { "id": 609, "Zona": "C", "Tamaño inmueble": "1000+",      "Tamaño jardín": "0 - 50" },
+        { "id": 610, "Zona": "C", "Tamaño inmueble": "1000+",      "Tamaño jardín": "51 - 100" },
+        { "id": 611, "Zona": "C", "Tamaño inmueble": "1000+",      "Tamaño jardín": "101 - 150" },
+        { "id": 612, "Zona": "C", "Tamaño inmueble": "1000+",      "Tamaño jardín": "151 - 200" },
+        { "id": 613, "Zona": "C", "Tamaño inmueble": "1000+",      "Tamaño jardín": "200+" }
+      ]
+    }
+  ]
+}

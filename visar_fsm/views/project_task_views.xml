@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="project_task_view_form_visar_fsm" model="ir.ui.view">
+        <field name="name">project.task.form.visar.fsm</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="priority">200</field>
+        <field name="arch" type="xml">
+
+            <!-- Ocultar el campo nativo sale_line_id (label + div contenedor).
+                 El campo sigue existiendo y poblándose; solo se oculta en la UI. -->
+            <xpath expr="//label[@for='sale_line_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[@name='sale_line_div']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Mostrar la orden de venta completa en su lugar. -->
+            <xpath expr="//div[@name='sale_line_div']" position="after">
+                <field name="visar_sale_order_id"
+                       options="{'no_create': True}"
+                       readonly="1"
+                       invisible="not visar_sale_order_id"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

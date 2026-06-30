@@ -62,7 +62,8 @@ Ver [`50-status-roadmap.md`](./50-status-roadmap.md).
 VISAR/repo/                ← Git: github.com/luisgarza-g/visar-luisg (rama main)
 ├── .context/              ← esta carpeta (documentación para desarrollar)
 ├── visar_base/            ← catálogos compartidos (v19.0.1.0.0)
-├── visar_fsm/             ← FSM: tareas agrupadas por proyecto (v19.0.1.0.1)
+├── visar_fsm/             ← FSM: tareas agrupadas + técnicos + Gantt (v19.0.1.0.2)
+├── visar_field_app/       ← app de campo técnicos (PIN, sin usuario) (v19.0.1.0.1)
 └── visar_appointment/     ← wizard web + citas (v19.0.2.0.15)
     └── migrations/        ← post-migrate catálogo legacy (¡solo en upgrade!)
 ```

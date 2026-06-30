@@ -28,8 +28,10 @@ class AppointmentType(models.Model):
         self.ensure_one()
         if not zone:
             return self.env['appointment.resource']
-        return self.resource_ids.filtered(
-            lambda r: zone in r.visar_zone_ids and self in r.visar_service_ids)
+        return self.env['appointment.resource'].search([
+            ('visar_zone_ids', 'in', zone.id),
+            ('visar_service_ids', 'in', self.id),
+        ])
 
     def _visar_resolve_tier(self, m2):
         """ Encuentra el tramo (visar.service.tier) cuyo rango contiene m2."""
@@ -181,24 +183,32 @@ class AppointmentType(models.Model):
     @api.model
     def _visar_unlink_questions_from_entry_types(self):
         """Quita preguntas Visar de los tipos de cita para que no aparezcan en el formulario web."""
-        questions = (
+        native_questions = (
             self._visar_question_zona()
             | self._visar_question_metros()
             | self._visar_question_plaga()
             | self._visar_question_roedores()
             | self._visar_question_tipo_plaga()
         )
-        question_ids = questions.ids
-        if not question_ids:
+        # También busca por nombre para cubrir duplicados creados antes del módulo.
+        Question = self.env['appointment.question'].sudo()
+        extra_questions = Question.search([('name', 'in', [
+            'Zona', 'Zona geográfica', 'Metros cuadrados',
+            '¿Tienes plaga o es preventivo?', '¿Tienes problema de roedores?', '¿Qué plaga tienes?',
+        ])])
+        all_question_ids = (native_questions | extra_questions).ids
+        if not all_question_ids:
             return
         for apt_type in (
             self._visar_get_master_appointment_type()
             | self._visar_get_valuation_appointment_type()
         ):
-            to_remove = apt_type.question_ids.filtered(lambda q: q.id in question_ids)
+            to_remove = apt_type.question_ids.filtered(lambda q: q.id in all_question_ids)
             if to_remove:
                 apt_type.sudo().write({'question_ids': [(3, qid) for qid in to_remove.ids]})
-        questions.sudo().write({'is_reusable': False})
+        # Solo marca is_reusable=False en las preguntas nativas del módulo (ya no tienen vínculos).
+        if native_questions:
+            native_questions.sudo().write({'is_reusable': False})
 
     @api.model
     def _visar_selection_dimension_ids(self, selections):
@@ -223,7 +233,10 @@ class AppointmentType(models.Model):
 
     @api.model
     def _visar_resolve_wizard_items(self, selections):
-        """Resuelve tier/variante por cada dimensión elegida en el wizard."""
+        """Resuelve tier por cada dimensión elegida en el wizard.
+
+        La variante se resuelve después según la zona del cliente (no aquí).
+        """
         Tier = self.env['visar.service.tier']
         ProductTemplate = self.env['product.template']
         items = []
@@ -233,7 +246,7 @@ class AppointmentType(models.Model):
             if not tier_id:
                 continue
             tier = Tier.browse(int(tier_id)).exists()
-            if not tier or not tier.product_id:
+            if not tier or not tier.product_tmpl_id:
                 continue
             template = tier.product_tmpl_id or ProductTemplate._visar_get_service_template_for_dimension(
                 dimension)
@@ -242,7 +255,7 @@ class AppointmentType(models.Model):
                 'dimension_id': dimension.id,
                 'tier_id': tier.id,
                 'tier_name': tier.name or tier.display_name,
-                'variant_id': tier.product_id.id,
+                'variant_id': None,  # ← Será resuelto por zona en _visar_build_sale_lines
                 'product_tmpl_id': template.id if template else False,
                 'appointment_type_id': apt_type.id if apt_type else False,
                 'is_valuation': tier.is_valuation,
@@ -288,17 +301,67 @@ class AppointmentType(models.Model):
         )
         return remaining.get('total_remaining_capacity', 0) >= asked_capacity
 
-    # Elige el recurso menos ocupado de cada pool que esté libre en el slot; retorna vacío si falta alguno.
+    @api.model
+    def _visar_pool_intersection(self, service_pools):
+        """Recursos que pueden cubrir todos los servicios del wizard (todos los pools)."""
+        pools = [pool for pool in service_pools.values() if pool]
+        if not pools:
+            return self.env['appointment.resource']
+        common = pools[0]
+        for pool in pools[1:]:
+            common &= pool
+        return common
+
+    @api.model
+    def _visar_pools_from_booking(self, booking):
+        """Pools vivos desde zone + items (no IDs congelados en sesión)."""
+        booking = booking or {}
+        zone = self.env['visar.zone'].browse(booking.get('zone_id')).exists()
+        if not zone:
+            return {}
+        items = booking.get('items') or []
+        if not items and booking.get('selections'):
+            items = self._visar_resolve_wizard_items(booking.get('selections'))
+        if not items:
+            return {}
+        pools, _missing = self._visar_service_resource_pools(zone, items)
+        return pools
+
+    @api.model
+    def _visar_filter_resource_ids_for_pools(self, service_pools):
+        """IDs para filter_resource_ids: intersección (un solo técnico) o unión como fallback."""
+        common = self._visar_pool_intersection(service_pools)
+        if common:
+            return common.ids
+        return list({rid for pool in service_pools.values() for rid in pool.ids})
+
+    @api.model
+    def _visar_free_candidates(self, master_type, pool, start_utc, stop_utc, asked_capacity=1):
+        return pool.filtered(
+            lambda r: self._visar_resource_free_at(
+                master_type, r, start_utc, stop_utc, asked_capacity)
+        )
+
+    # Prefiere un solo técnico que cubra todos los servicios; si no, uno libre por pool.
     @api.model
     def _visar_pick_resources_for_slot(self, master_type, service_pools, start_utc, stop_utc, asked_capacity=1):
+        if not service_pools or any(not pool for pool in service_pools.values()):
+            return self.env['appointment.resource']
+
+        common = self._visar_pool_intersection(service_pools)
+        free_common = self._visar_free_candidates(
+            master_type, common, start_utc, stop_utc, asked_capacity)
+        if free_common:
+            best = min(
+                free_common,
+                key=lambda r: self._visar_resource_load(r, start_utc, stop_utc),
+            )
+            return best
+
         picked = self.env['appointment.resource']
         for pool in service_pools.values():
-            if not pool:
-                return self.env['appointment.resource']
-            candidates = pool.filtered(
-                lambda r: self._visar_resource_free_at(
-                    master_type, r, start_utc, stop_utc, asked_capacity)
-            )
+            candidates = self._visar_free_candidates(
+                master_type, pool, start_utc, stop_utc, asked_capacity)
             if not candidates:
                 return self.env['appointment.resource']
             best = min(candidates, key=lambda r: self._visar_resource_load(r, start_utc, stop_utc))
@@ -361,7 +424,11 @@ class AppointmentType(models.Model):
 
     @api.model
     def _visar_list_unit_price(self, product, zone):
-        """Precio de lista unitario respetando pricelist de zona."""
+        """Precio de lista unitario desde la pricelist de la zona.
+
+        La variante ya fue resuelta correctamente por _visar_get_variant_for_zone(),
+        así que la pricelist encuentra el precio correcto para la zona del cliente.
+        """
         if not product:
             return 0.0
         website = self.env['website'].get_current_website(fallback=False)
@@ -371,6 +438,23 @@ class AppointmentType(models.Model):
         if pricelist:
             return pricelist._get_product_price(product, 1.0)
         return product.lst_price
+
+    @api.model
+    def _visar_cart_line_net_unit_price(self, line_vals, zone):
+        """Precio unitario neto de una línea antes de añadirla al carrito."""
+        product = self.env['product.product'].browse(line_vals.get('product_id')).exists()
+        if not product:
+            return 0.0
+        unit = self._visar_list_unit_price(product, zone)
+        discount = line_vals.get('discount') or 0.0
+        return unit * (1.0 - discount / 100.0)
+
+    @api.model
+    def _visar_skip_cart_line(self, line_vals, zone):
+        """True si la línea no debe ir al carrito (Odoo bloquea precio 0)."""
+        if line_vals.get('is_free'):
+            return True
+        return self._visar_cart_line_net_unit_price(line_vals, zone) <= 0
 
     @api.model
     def _visar_quote_line_label(self, line_vals, product):
@@ -418,16 +502,19 @@ class AppointmentType(models.Model):
 
         lines = []
         for item in items:
-            variant = self.env['product.product'].browse(item['variant_id']).exists()
+            tier = self.env['visar.service.tier'].browse(item.get('tier_id')).exists()
+            if not tier:
+                continue
+            # Resuelve la variante correcta según la zona usando el tabulador
+            variant = tier._visar_get_variant_for_zone(zone)
             if not variant:
                 continue
-            variant = self.env['product.template']._visar_variant_for_zone(variant, zone)
-            tier = self.env['visar.service.tier'].browse(item.get('tier_id')).exists()
             is_free = item.get('is_free') or (tier and tier.is_free)
-            if is_free:
+            unit_price = self._visar_list_unit_price(variant, zone)
+            if is_free or unit_price <= 0:
                 lines.append({
                     'product_id': variant.id,
-                    'discount': 100.0,
+                    'discount': 100.0 if unit_price > 0 else 0.0,
                     'dimension_id': item.get('dimension_id'),
                     'tier_name': item.get('tier_name'),
                     'is_free': True,

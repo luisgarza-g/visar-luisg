@@ -97,15 +97,19 @@ class SaleOrder(models.Model):
         if event.stop:
             date_vals['date_deadline'] = event.stop
 
-        user_ids = (
+        employees = (
             event.appointment_resource_ids
-            .mapped('visar_employee_id.user_id')
-            .filtered(lambda u: u.id)
-            .ids
+            .mapped('visar_employee_id')
+            .filtered(lambda e: e.id)
         )
+        # Asignación nativa por usuario (solo aplica a técnicos que tengan usuario).
+        user_ids = employees.mapped('user_id').filtered(lambda u: u.id).ids
 
         for task in tasks:
             vals = dict(date_vals)
+            # Asignación real por empleado (técnicos de campo sin usuario interno).
+            if employees:
+                vals['visar_technician_ids'] = [(6, 0, employees.ids)]
             if user_ids:
                 vals['user_ids'] = [(6, 0, user_ids)]
             if vals:

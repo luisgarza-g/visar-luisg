@@ -49,6 +49,32 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         request.session[SESSION_KEY] = self._visar_booking_payload(booking)
         return request.session[SESSION_KEY]
 
+    @staticmethod
+    def _visar_id_eq(left, right):
+        try:
+            return int(left or 0) == int(right or 0)
+        except (TypeError, ValueError):
+            return left == right
+
+    # Reconstruye items desde selections si faltan; None si el wizard no está listo para pago.
+    def _visar_resolve_wizard_payment_booking(self, booking, appointment_type):
+        booking = booking or {}
+        if booking.get('mode') != 'wizard':
+            return None
+        if not self._visar_id_eq(booking.get('master_appointment_type_id'), appointment_type.id):
+            return None
+        if not appointment_type.has_payment_step or not booking.get('zone_id'):
+            return None
+        items = booking.get('items') or []
+        if not items and booking.get('selections'):
+            items = request.env['appointment.type'].sudo()._visar_resolve_wizard_items(
+                booking.get('selections'))
+            if items:
+                booking = dict(booking)
+                booking['items'] = items
+                self._visar_persist_booking(booking)
+        return booking if items else None
+
     # Devuelve True si hay una sesión de wizard activa en curso.
     def _visar_wizard_active(self):
         booking = self._visar_get_booking_session()
@@ -61,7 +87,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         booking = self._visar_get_booking_session()
         if not booking or booking.get('mode') != 'wizard':
             return False
-        if booking.get('master_appointment_type_id') != appointment_type_id:
+        if not self._visar_id_eq(booking.get('master_appointment_type_id'), appointment_type_id):
             return False
         return bool(booking.get('items'))
 
@@ -85,6 +111,14 @@ class VisarAppointmentController(WebsiteAppointmentSale):
             pools[pool_key] = AptResource.browse(resource_ids).exists()
         return pools
 
+    # Pools actuales por zona + servicios (preferido sobre IDs congelados en sesión).
+    def _visar_get_service_pools(self, booking):
+        AptType = request.env['appointment.type'].sudo()
+        pools = AptType._visar_pools_from_booking(booking)
+        if pools:
+            return pools
+        return self._visar_pools_from_session(booking)
+
     # Genera el dict visar_quote con precios estimados para mostrar en la página de cita.
     def _visar_appointment_quote_context(self, appointment_type, asked_capacity=1):
         booking = self._visar_get_booking_session()
@@ -105,7 +139,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
 
         if not appointment_type.visar_is_master or not self._visar_wizard_active():
             return {'visar_quote': False}
-        if booking.get('master_appointment_type_id') != appointment_type.id:
+        if not self._visar_id_eq(booking.get('master_appointment_type_id'), appointment_type.id):
             return {'visar_quote': False}
         items = booking.get('items') or []
         if not items:
@@ -589,7 +623,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
                 'zone': zone,
                 'missing_services': missing,
             })
-        all_resource_ids = list({rid for pool in pools.values() for rid in pool.ids})
+        filter_ids = AptType._visar_filter_resource_ids_for_pools(pools)
         self._visar_persist_booking({
             'mode': 'wizard',
             'master_appointment_type_id': master.id,
@@ -598,7 +632,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
             'items': items,
             'service_pools': {key: pool.ids for key, pool in pools.items()},
         })
-        filter_param = quote_plus(json.dumps(all_resource_ids))
+        filter_param = quote_plus(json.dumps(filter_ids))
         return request.redirect(
             '/appointment/%s?filter_resource_ids=%s' % (master.id, filter_param))
 
@@ -674,7 +708,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         if not self._visar_wizard_active():
             return result
         booking = self._visar_get_booking_session()
-        pools = self._visar_pools_from_session(booking)
+        pools = self._visar_get_service_pools(booking)
         timezone = request.session.get('timezone') or appointment_type.appointment_tz
         filtered = request.env['appointment.type']._visar_filter_slots_multi_service(
             appointment_type, result['slots'], pools, timezone, asked_capacity)
@@ -713,7 +747,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
     ):
         if self._visar_wizard_active() and appointment_type.visar_is_master:
             booking = self._visar_get_booking_session()
-            pools = self._visar_pools_from_session(booking)
+            pools = self._visar_get_service_pools(booking)
             try:
                 duration_f = float(duration)
                 asked_capacity_i = int(asked_capacity)
@@ -760,7 +794,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
                 date_start = tz_session.localize(start_dt).astimezone(pytz.utc).replace(tzinfo=None)
             duration = float(duration_str)
             date_end = date_start + relativedelta(hours=duration)
-            pools = self._visar_pools_from_session(booking)
+            pools = self._visar_get_service_pools(booking)
             resources = request.env['appointment.type']._visar_pick_resources_for_slot(
                 appointment_type, pools, date_start, date_end, int(asked_capacity))
             if not resources:
@@ -785,7 +819,7 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         items = None
         if (
             booking.get('mode') == 'wizard'
-            and booking.get('master_appointment_type_id') == appointment_type.id
+            and self._visar_id_eq(booking.get('master_appointment_type_id'), appointment_type.id)
         ):
             items = booking.get('items') or []
         elif (
@@ -868,15 +902,15 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         staff_user=None, asked_capacity=1, booking_line_values=None,
         extra_calendar_event_params=None,
     ):
-        booking = request.session.get(SESSION_KEY)
+        booking = self._visar_get_booking_session()
         extra_calendar_event_params = dict(extra_calendar_event_params or {})
         if booking and booking.get('mode') == 'wizard' \
-                and booking.get('master_appointment_type_id') == appointment_type.id:
+                and self._visar_id_eq(booking.get('master_appointment_type_id'), appointment_type.id):
             extra_calendar_event_params['visar_zone_id'] = booking.get('zone_id')
             extra_calendar_event_params['visar_booking_items'] = \
                 request.env['appointment.type']._visar_items_snapshot(booking.get('items', []))
         elif booking and booking.get('mode') == 'valuation' \
-                and booking.get('appointment_type_id') == appointment_type.id:
+                and self._visar_id_eq(booking.get('appointment_type_id'), appointment_type.id):
             extra_calendar_event_params['visar_zone_id'] = booking.get('zone_id')
             extra_calendar_event_params['visar_booking_items'] = \
                 request.env['appointment.type']._visar_items_snapshot(booking.get('items', []))
@@ -885,14 +919,17 @@ class VisarAppointmentController(WebsiteAppointmentSale):
             appointment_type, booking, answer_input_values, customer)
         description = self._visar_append_answers_to_description(description, visar_inputs)
 
-        visar_wizard_payment = (
+        wizard_booking = self._visar_resolve_wizard_payment_booking(booking, appointment_type)
+        visar_wizard_payment = bool(wizard_booking)
+        visar_valuation_payment = (
             booking
-            and booking.get('mode') == 'wizard'
-            and booking.get('master_appointment_type_id') == appointment_type.id
+            and booking.get('mode') == 'valuation'
+            and self._visar_id_eq(booking.get('appointment_type_id'), appointment_type.id)
             and appointment_type.has_payment_step
-            and booking.get('items')
         )
-        if visar_wizard_payment:
+        if visar_wizard_payment or visar_valuation_payment:
+            if wizard_booking:
+                booking = wizard_booking
             calendar_booking = self._visar_create_calendar_booking(
                 appointment_type, date_start, date_end, description, allday,
                 answer_input_values, name, customer, appointment_invite, guests=guests,
@@ -902,6 +939,11 @@ class VisarAppointmentController(WebsiteAppointmentSale):
             response = self._redirect_to_payment(calendar_booking)
             request.session.pop(SESSION_KEY, None)
             return response
+
+        if appointment_type.visar_is_master and appointment_type.has_payment_step:
+            from odoo.addons.base.models.ir_qweb import keep_query
+            return request.redirect('/appointment/%s?%s' % (
+                appointment_type.id, keep_query('*', state='failed-resource')))
 
         response = super()._handle_appointment_form_submission(
             appointment_type, date_start, date_end, description, duration, allday,
@@ -913,9 +955,78 @@ class VisarAppointmentController(WebsiteAppointmentSale):
         request.session.pop(SESSION_KEY, None)
         return response
 
+    # Construye el carrito multi-servicio del wizard y redirige a /shop/cart.
+    def _visar_fill_wizard_cart_and_redirect(self, calendar_booking, booking):
+        from odoo.addons.base.models.ir_qweb import keep_query
+
+        order_sudo = request.cart or request.website._create_cart()
+        zone = request.env['visar.zone'].sudo().browse(booking.get('zone_id'))
+        order_sudo._visar_apply_zone_pricelist(zone)
+
+        master = request.env['appointment.type'].sudo().browse(booking['master_appointment_type_id'])
+        sale_lines = master._visar_build_sale_lines(
+            booking.get('items', []), zone,
+            include_roedores=self._visar_booking_has_roedores(booking))
+        if not sale_lines:
+            calendar_booking.sudo().unlink()
+            return request.redirect('/appointment/%s?%s' % (
+                master.id, keep_query('*', state='failed-resource')))
+
+        tz = (request.session.get('timezone') or
+              request.env.context.get('tz') or
+              calendar_booking.appointment_type_id.appointment_tz)
+        quantity = calendar_booking.asked_capacity or 1
+        lines_added = 0
+
+        for line_vals in sale_lines:
+            if master._visar_skip_cart_line(line_vals, zone):
+                continue
+            line_qty = line_vals.get('quantity', quantity)
+            cart_values = order_sudo._cart_add(
+                product_id=line_vals['product_id'],
+                quantity=line_qty,
+                calendar_booking_id=calendar_booking.id,
+                calendar_booking_tz=tz,
+            )
+            if cart_values.get('quantity', 0) < line_qty:
+                calendar_booking.sudo().unlink()
+                return request.redirect('/appointment/%s?%s' % (
+                    master.id, keep_query('*', state='failed-resource')))
+            lines_added += 1
+            discount = line_vals.get('discount') or 0.0
+            if discount:
+                sol = order_sudo.order_line.filtered(
+                    lambda line: line.product_id.id == line_vals['product_id']
+                    and calendar_booking in line.calendar_booking_ids
+                )[-1:]
+                if sol:
+                    sol.write({'discount': discount})
+
+        if not lines_added:
+            calendar_booking.sudo().unlink()
+            return request.redirect('/appointment/%s?%s' % (
+                master.id, keep_query('*', state='failed-resource')))
+
+        if order_sudo._is_anonymous_cart():
+            partner_values = {
+                'name': calendar_booking.name,
+                'email': calendar_booking.partner_id.email,
+                'phone': calendar_booking.partner_id.phone,
+            }
+            booked_by_partner, feedback_dict = CustomerPortal()._create_or_update_address(
+                request.env['res.partner'].sudo(),
+                order_sudo=order_sudo,
+                verify_address_values=False,
+                **partner_values,
+            )
+            if not feedback_dict.get('invalid_fields'):
+                order_sudo._update_address(booked_by_partner.id, ['partner_id'])
+
+        return request.redirect("/shop/cart")
+
     # Construye el carrito con líneas multi-servicio y redirige al checkout de pago.
     def _redirect_to_payment(self, calendar_booking):
-        booking = request.session.get(SESSION_KEY)
+        booking = self._visar_get_booking_session()
         if booking and booking.get('mode') == 'valuation':
             order_sudo = request.cart or request.website._create_cart()
             zone = request.env['visar.zone'].sudo().browse(booking.get('zone_id'))
@@ -963,65 +1074,17 @@ class VisarAppointmentController(WebsiteAppointmentSale):
                 )
                 if not feedback_dict.get('invalid_fields'):
                     order_sudo._update_address(booked_by_partner.id, ['partner_id'])
-            return request.redirect("/shop/checkout?try_skip_step=true")
+            return request.redirect("/shop/cart")
 
-        if not booking or booking.get('mode') != 'wizard':
-            return super()._redirect_to_payment(calendar_booking)
+        apt_type = calendar_booking.appointment_type_id
+        wizard_booking = self._visar_resolve_wizard_payment_booking(booking, apt_type)
+        if wizard_booking:
+            return self._visar_fill_wizard_cart_and_redirect(calendar_booking, wizard_booking)
 
-        order_sudo = request.cart or request.website._create_cart()
-        zone = request.env['visar.zone'].sudo().browse(booking.get('zone_id'))
-        order_sudo._visar_apply_zone_pricelist(zone)
-
-        master = request.env['appointment.type'].sudo().browse(booking['master_appointment_type_id'])
-        sale_lines = master._visar_build_sale_lines(
-            booking.get('items', []), zone,
-            include_roedores=self._visar_booking_has_roedores(booking))
-        if not sale_lines:
-            calendar_booking.sudo().unlink()
+        if apt_type.visar_is_master:
             from odoo.addons.base.models.ir_qweb import keep_query
+            calendar_booking.sudo().unlink()
             return request.redirect('/appointment/%s?%s' % (
-                master.id, keep_query('*', state='failed-resource')))
+                apt_type.id, keep_query('*', state='failed-resource')))
 
-        tz = (request.session.get('timezone') or
-              request.env.context.get('tz') or
-              calendar_booking.appointment_type_id.appointment_tz)
-        quantity = calendar_booking.asked_capacity or 1
-
-        for line_vals in sale_lines:
-            line_qty = line_vals.get('quantity', quantity)
-            cart_values = order_sudo._cart_add(
-                product_id=line_vals['product_id'],
-                quantity=line_qty,
-                calendar_booking_id=calendar_booking.id,
-                calendar_booking_tz=tz,
-            )
-            if cart_values.get('quantity', 0) < line_qty:
-                calendar_booking.sudo().unlink()
-                from odoo.addons.base.models.ir_qweb import keep_query
-                return request.redirect('/appointment/%s?%s' % (
-                    master.id, keep_query('*', state='failed-resource')))
-            discount = line_vals.get('discount') or 0.0
-            if discount:
-                sol = order_sudo.order_line.filtered(
-                    lambda line: line.product_id.id == line_vals['product_id']
-                    and calendar_booking in line.calendar_booking_ids
-                )[-1:]
-                if sol:
-                    sol.write({'discount': discount})
-
-        if order_sudo._is_anonymous_cart():
-            partner_values = {
-                'name': calendar_booking.name,
-                'email': calendar_booking.partner_id.email,
-                'phone': calendar_booking.partner_id.phone,
-            }
-            booked_by_partner, feedback_dict = CustomerPortal()._create_or_update_address(
-                request.env['res.partner'].sudo(),
-                order_sudo=order_sudo,
-                verify_address_values=False,
-                **partner_values,
-            )
-            if not feedback_dict.get('invalid_fields'):
-                order_sudo._update_address(booked_by_partner.id, ['partner_id'])
-
-        return request.redirect("/shop/checkout?try_skip_step=true")
+        return super()._redirect_to_payment(calendar_booking)

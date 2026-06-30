@@ -1,0 +1,313 @@
+{
+  "meta": {
+    "version": "2.1",
+    "description": "Catálogo Visar — productos unificados prod (fumigación 30, mantenimiento 31)",
+    "generated_at": "2026-06-29T22:24:05.358243+00:00",
+    "reference_db": "visar_main_dump"
+  },
+  "ir_config_parameter": {
+    "visar.master_appointment_type_id": "7",
+    "visar.wizard_entry_appointment_type_id": "6",
+    "visar.valuation_entry_appointment_type_id": "5",
+    "visar.valuation_product_tmpl_id": "33",
+    "visar.roedores_product_tmpl_id": "10",
+    "visar.combo_corte_factor": "0.5",
+    "visar.fsm_project_fumigacion_id": "17",
+    "visar.fsm_project_corte_id": "18",
+    "visar.fsm_project_valoracion_id": "19"
+  },
+  "service_dimensions": [
+    {
+      "code": "fumigacion_interior",
+      "group_code": "fumigacion",
+      "name": "Interior",
+      "product_tmpl_id": 30,
+      "product_name": "Fumigación interior o exterior (anti-rastreros, anti-voladores y anti-roedores)"
+    },
+    {
+      "code": "fumigacion_exterior",
+      "group_code": "fumigacion",
+      "name": "Exterior",
+      "product_tmpl_id": 30,
+      "product_name": "Fumigación interior o exterior (anti-rastreros, anti-voladores y anti-roedores)"
+    },
+    {
+      "code": "corte_poda",
+      "group_code": "corte",
+      "name": "Corte de pasto (combo)",
+      "product_tmpl_id": 31,
+      "product_name": "Mantenimiento de áreas verdes"
+    }
+  ],
+  "service_tiers": [
+    {
+      "product_tmpl_id": 11,
+      "name": "0 – 50 m²",
+      "m2_min": 0.0,
+      "m2_max": 50.0,
+      "variant_id": 625,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 11,
+      "name": "51 – 100 m²",
+      "m2_min": 51.0,
+      "m2_max": 100.0,
+      "variant_id": 626,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 11,
+      "name": "101 – 150 m²",
+      "m2_min": 101.0,
+      "m2_max": 150.0,
+      "variant_id": 627,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 11,
+      "name": "151 – 200 m²",
+      "m2_min": 151.0,
+      "m2_max": 200.0,
+      "variant_id": 634,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 11,
+      "name": "Más de 200 m² (valoración técnica)",
+      "m2_min": 201.0,
+      "m2_max": 99999.0,
+      "variant_id": 614,
+      "is_valuation": true,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "0 – 50 m² (incluida)",
+      "m2_min": 0.0,
+      "m2_max": 50.0,
+      "variant_id": 504,
+      "is_valuation": false,
+      "is_free": true
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "1 – 250 m²",
+      "m2_min": 1.0,
+      "m2_max": 250.0,
+      "variant_id": 504,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "51 – 100 m²",
+      "m2_min": 51.0,
+      "m2_max": 100.0,
+      "variant_id": 505,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "101 – 500 m²",
+      "m2_min": 101.0,
+      "m2_max": 500.0,
+      "variant_id": 506,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "251 – 500 m²",
+      "m2_min": 251.0,
+      "m2_max": 500.0,
+      "variant_id": 508,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "Más de 500 m² (valoración técnica)",
+      "m2_min": 501.0,
+      "m2_max": 99999.0,
+      "variant_id": 614,
+      "is_valuation": true,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "501 – 1,000 m²",
+      "m2_min": 501.0,
+      "m2_max": 1000.0,
+      "variant_id": 512,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 30,
+      "name": "Más de 1,000 m² (valoración técnica)",
+      "m2_min": 1001.0,
+      "m2_max": 99999.0,
+      "variant_id": 614,
+      "is_valuation": true,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 31,
+      "name": "0 – 50 m²",
+      "m2_min": 0.0,
+      "m2_max": 50.0,
+      "variant_id": 544,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 31,
+      "name": "51 – 100 m²",
+      "m2_min": 51.0,
+      "m2_max": 100.0,
+      "variant_id": 545,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 31,
+      "name": "101 – 150 m²",
+      "m2_min": 101.0,
+      "m2_max": 150.0,
+      "variant_id": 546,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 31,
+      "name": "151 – 200 m²",
+      "m2_min": 151.0,
+      "m2_max": 200.0,
+      "variant_id": 547,
+      "is_valuation": false,
+      "is_free": false
+    },
+    {
+      "product_tmpl_id": 31,
+      "name": "Más de 200 m² (valoración técnica)",
+      "m2_min": 201.0,
+      "m2_max": 99999.0,
+      "variant_id": 614,
+      "is_valuation": true,
+      "is_free": false
+    }
+  ],
+  "zones": [
+    {
+      "code": "A",
+      "name": "Zona A (San Pedro)"
+    },
+    {
+      "code": "B",
+      "name": "Zona B (base)"
+    },
+    {
+      "code": "C",
+      "name": "Zona C (periferia)"
+    }
+  ],
+  "combo_rules": [
+    {
+      "name": "Combo fumigación interior + exterior + corte",
+      "discount_factor": 0.5,
+      "required_dimension_codes": [
+        "fumigacion_interior",
+        "fumigacion_exterior",
+        "corte_poda"
+      ],
+      "discount_dimension_codes": [
+        "corte_poda"
+      ]
+    }
+  ],
+  "products": {
+    "fumigacion": {
+      "tmpl_id": 30,
+      "name": "Fumigación interior o exterior (anti-rastreros, anti-voladores y anti-roedores)"
+    },
+    "mantenimiento": {
+      "tmpl_id": 31,
+      "name": "Mantenimiento de áreas verdes"
+    },
+    "valoracion": {
+      "tmpl_id": 33,
+      "name": "Visita de valoración técnica"
+    },
+    "control_roedores": {
+      "tmpl_id": 10,
+      "name": "Control de roedores"
+    },
+    "estacion_antirroedores": {
+      "tmpl_id": 26,
+      "name": "Estación antirroedores"
+    }
+  },
+  "appointment_types": {
+    "interior": {
+      "id": 4,
+      "name": "Consulta pagada",
+      "active": true,
+      "visar_flow": false,
+      "visar_is_master": false
+    },
+    "corte": {
+      "id": 8,
+      "name": "Corte de pasto",
+      "active": true,
+      "visar_flow": false,
+      "visar_is_master": false
+    },
+    "wizard": {
+      "id": 6,
+      "name": "Indoor or outdoor fumigation",
+      "active": true,
+      "visar_flow": "wizard",
+      "visar_is_master": false
+    },
+    "master": {
+      "id": 7,
+      "name": "Visar — cita multi-servicio",
+      "active": true,
+      "visar_flow": false,
+      "visar_is_master": true
+    },
+    "valuation": {
+      "id": 5,
+      "name": "Technical assessment visit",
+      "active": true,
+      "visar_flow": "valuation",
+      "visar_is_master": false
+    },
+    "mantenimiento_legacy": {
+      "id": 9,
+      "name": "Corte de pasto y poda.",
+      "active": true,
+      "visar_flow": false,
+      "visar_is_master": false
+    }
+  },
+  "optional_lines": [
+    {
+      "service_tmpl_id": 10,
+      "addon_tmpl_id": 26,
+      "is_mandatory": true,
+      "quantity": 3
+    }
+  ],
+  "notes": [
+    "Producto único fumigación (interior+exterior = dimensiones, no productos split).",
+    "Mantenimiento de áreas verdes = corte del combo (producto 31 en main).",
+    "Legacy desactivados: Fumigación interior/exterior, Corte de pasto, COMBO split."
+  ]
+}

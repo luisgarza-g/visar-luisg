@@ -48,7 +48,7 @@ Pestaña Visar en producto + tabla add-ons junto a `optional_product_ids`.
 
 ---
 
-## `visar_fsm` (v19.0.1.0.1)
+## `visar_fsm` (v19.0.1.0.2)
 
 **Dependencias:** `visar_base`, `appointment`, `hr`, `industry_fsm`, `industry_fsm_sale`.
 
@@ -59,8 +59,8 @@ Generación de tareas FSM al confirmar pedidos Visar (D-07).
 | Modelo | Archivo | Qué hace |
 |---|---|---|
 | `sale.order.line` | `models/sale_order_fsm.py` | Override `_timesheet_service_generation`: agrupa líneas Visar por `project_id` → **una tarea por proyecto**; asigna add-ons como materiales; enriquece tareas. |
-| `sale.order` | `models/sale_order_fsm.py` | `_visar_enrich_fsm_tasks` — copia `planned_date_begin`/`date_deadline` y `user_ids` desde `calendar.event`. |
-| `project.task` | `models/project_task.py` | **`visar_sale_order_id`** (related stored a `sale_order_id`) — expone la orden completa en la tarea. |
+| `sale.order` | `models/sale_order_fsm.py` | `_visar_enrich_fsm_tasks` — copia `planned_date_begin`/`date_deadline`, **`visar_technician_ids`** (empleados) y `user_ids` desde `calendar.event`. |
+| `project.task` | `models/project_task.py` | **`visar_sale_order_id`** (related a `sale_order_id`) + **`visar_technician_ids`** (M2m `hr.employee`) — asignación real por empleado (sustituye `user_ids`, vacío sin usuarios). |
 | `calendar.event` | `models/calendar_event.py` | `visar_fsm_task_ids` (computed M2m). |
 | `appointment.resource` | `models/appointment_resource.py` | (vista backend) |
 
@@ -68,7 +68,10 @@ Generación de tareas FSM al confirmar pedidos Visar (D-07).
 
 | Archivo | Qué hace |
 |---|---|
-| `views/project_task_views.xml` | Oculta `sale_line_id` nativo; muestra `visar_sale_order_id` (solo lectura). |
+| `views/project_task_views.xml` | Oculta `sale_line_id` nativo; muestra `visar_sale_order_id` + `visar_technician_ids`. **Reemplaza el Gantt FSM** (`industry_fsm.fsm_project_task_view_gantt`): `default_group_by=visar_technician_ids`, `edit=0` (solo lectura), sin `progress_bar`/`display_unavailability` (calculan sobre `user_ids`). |
+| `views/fsm_technician_planning.xml` | Acción + menú **Field Service → Planning → Por técnico** (`action_fsm_planning_by_technician`): Gantt por técnico de **todos** los técnicos, **sin** el filtro `search_default_my_tasks` de la pantalla "Mis tareas". |
+
+> **Gantt por técnico:** una fila por empleado, barras = tareas FSM por `planned_date_begin`/`date_deadline`. La asignación NO cambia de origen (recurso de la cita → empleado en la tarea); solo cambia el campo y la vista. Para despacho usar **Planning → Por técnico** (la pantalla "Mis tareas" filtra por tu usuario y oculta tareas de técnicos sin usuario).
 
 ### Setup — `hooks.py`
 
@@ -78,6 +81,70 @@ Generación de tareas FSM al confirmar pedidos Visar (D-07).
 - IDs guardados en `ir.config_parameter` (`visar.fsm_project_*_id`).
 
 > Este hook **sí corre en `-i`**. Re-ejecutado también en migración `visar_appointment` 19.0.2.0.14.
+
+---
+
+## `visar_field_app` (v19.0.1.0.1)
+
+**Dependencias:** `visar_fsm`, `website`, `industry_fsm_report`.
+
+App web para técnicos de campo, **patrón POS / `pos_hr`**: un dispositivo, identificación
+por **PIN**, **sin usuario interno de Odoo** (no consume licencia). Resuelve la tensión
+"técnicos = recursos, no usuarios" del lado de ejecución: permite captura en campo y
+**atribución por técnico** (comisiones de upsell, auditoría) sin licenciar a cada técnico.
+
+> **Por qué portal y no la página nativa de FSM:** la worksheet/tarea nativa es backend y
+> exige usuario interno. La app de portal escribe en los **modelos nativos** (worksheet
+> dinámica, firma, adjuntos) por detrás vía controlador — misma estructura de datos, otra
+> puerta de entrada. Mismo patrón que el wizard de citas (QWeb + controlador, sin OWL nativo).
+
+> **Worksheet y reportes = 100% nativos.** La app renderiza dinámicamente los campos `x_`
+> de la worksheet (`worksheet.template.model_id`, leyendo el form view nativo y `fields_get`)
+> y los escribe en el registro `x_project_task_worksheet_template_<id>` (uno por tarea, enlace
+> `x_project_task_id`). La firma usa los campos nativos `worksheet_signature` /
+> `worksheet_signed_by`. Así el **reporte nativo** (`industry_fsm.worksheet_custom`) se genera
+> sin cambios. La worksheet se configura como siempre (plantilla por proyecto).
+
+### Modelos
+
+| Modelo | Archivo | Para qué |
+|---|---|---|
+| `visar.field.session` | `models/field_session.py` | "Turno" del técnico (abre login PIN, cierra logout). `employee_id`, `date_start/end`, `state`. |
+| `hr.employee` | `models/hr_employee.py` | **`visar_field_pin`** + `_visar_field_find_by_pin`. |
+| `project.task` | `models/project_task.py` | Atribución `visar_field_closed_by_id/_at`. (La asignación `visar_technician_ids` se movió a **`visar_fsm`**.) Firma/worksheet/reporte = campos nativos. |
+| _(sin extensión de `sale.order`)_ | — | El poblado de `visar_technician_ids` lo hace `visar_fsm._visar_enrich_fsm_tasks`. |
+
+### Controlador — `controllers/main.py` (`type='http', auth='public'`)
+
+Sesión HTTP: `visar_field_employee_id`, `visar_field_session_id`. Todo en sudo, **acotado
+estrictamente** al empleado de la sesión (`_task_for_employee`).
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /visar/field` + `POST …/login` | Login por PIN → crea `visar.field.session`. |
+| `POST …/logout` | Cierra el turno. |
+| `GET …/tasks` | Servicios del técnico (`visar_technician_ids in employee`, no cerrados). |
+| `GET …/task/<id>` | Detalle + fotos + worksheet dinámica + firma. |
+| `POST …/task/<id>/photo` | Sube fotos → `ir.attachment` sobre la tarea. |
+| `GET …/task/<id>/image/<att_id>` | Sirve adjunto (acotado al técnico de la sesión). |
+| `POST …/task/<id>/worksheet` | Escribe los campos `x_` de la worksheet nativa. |
+| `POST …/task/<id>/close` | Firma nativa + `state='1_done'` + estampa `visar_field_closed_by_id`. |
+| `GET …/task/<id>/report` | PDF del reporte nativo (`_render_qweb_pdf`). |
+
+Helpers worksheet: `_worksheet_model`, `_worksheet_record(create=)`, `_worksheet_field_names`
+(orden del form view), `_worksheet_field_descriptors`, `_worksheet_write_values` (coerción por ttype).
+
+### Frontend — `views/field_app_templates.xml` + assets
+
+Plantillas QWeb (`website.layout`): login, lista, detalle. La worksheet se renderiza por tipo
+de campo (char/text/html/select/m2o/boolean/number/date/binary). Firma con `<canvas>` →
+`static/src/js/field_app.js` (vanilla, sin OWL) vuelca dataURL a `worksheet_signature`.
+
+### Limitación aceptada
+
+NO usa features de "actor" nativas (timesheet propio, notificaciones, "Mis tareas" nativo) —
+esas requieren usuario interno. La worksheet **sí** es la nativa (su registro y reporte), solo
+que capturada desde el portal. El v1 del form no edita campos relacionales o2m/m2m.
 
 ---
 

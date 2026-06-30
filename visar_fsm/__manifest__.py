@@ -11,7 +11,7 @@ Integración con Field Service Management para VISAR:
     'author': "Hanova",
     'website': "https://hanova.mx",
     'category': 'Services/Field Service',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.4',
     'license': 'LGPL-3',
     'depends': [
         'visar_base',
@@ -24,6 +24,7 @@ Integración con Field Service Management para VISAR:
         'views/appointment_resource_views.xml',
         'views/calendar_event_views.xml',
         'views/project_task_views.xml',
+        'views/fsm_technician_planning.xml',
     ],
     'installable': True,
     'application': False,

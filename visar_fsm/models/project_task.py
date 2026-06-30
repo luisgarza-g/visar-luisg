@@ -17,3 +17,15 @@ class ProjectTask(models.Model):
         readonly=True,
         help="Orden de venta completa de la que proviene este servicio externo "
              "(incluye las dos podas, fumigaciones y add-ons de la misma cita).")
+
+    # Técnicos asignados como EMPLEADOS (no usuarios). Es la asignación real del
+    # servicio externo: se puebla desde la cita (recurso → empleado) en
+    # _visar_enrich_fsm_tasks y es el campo por el que agrupa el Gantt de técnicos.
+    # Sustituye al nativo user_ids, que quedaba vacío porque los técnicos de campo
+    # no tienen usuario interno de Odoo.
+    visar_technician_ids = fields.Many2many(
+        'hr.employee',
+        'visar_task_technician_rel', 'task_id', 'employee_id',
+        string="Técnicos asignados",
+        help="Empleados (técnicos de campo) asignados a este servicio externo. "
+             "No requieren usuario interno de Odoo.")
